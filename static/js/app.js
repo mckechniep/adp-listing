@@ -3,10 +3,13 @@ let allListings = [];
 let filteredListings = [];
 let availableDates = [];
 let recognition = null;
+let globalRecognition = null; // For global wake word detection
 let isListening = false;
+let isGlobalListening = false; // For global wake word listening
 let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
 let isReading = false;
+let wasVoiceTriggered = false; // Track if scraping was triggered by voice
 
 // Text-to-speech functionality
 function speakListings(autoRead = false) {
@@ -161,19 +164,164 @@ function initializeVoiceRecognition() {
     };
 }
 
+// Initialize global voice recognition for wake word
+function initializeGlobalVoiceRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        console.log('Voice recognition not supported for global listening');
+        return;
+    }
+    
+    globalRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    globalRecognition.continuous = true; // Keep listening continuously
+    globalRecognition.interimResults = false;
+    globalRecognition.lang = 'en-US';
+    
+    globalRecognition.onstart = function() {
+        isGlobalListening = true;
+        console.log('Global voice recognition started - listening for wake word');
+        showWakeWordStatus('listening');
+    };
+    
+    globalRecognition.onend = function() {
+        isGlobalListening = false;
+        hideWakeWordStatus();
+        // Restart global listening after a short delay
+        setTimeout(() => {
+            if (document.getElementById('voicePanel').style.display === 'none') {
+                startGlobalListening();
+            }
+        }, 1000);
+    };
+    
+    globalRecognition.onresult = function(event) {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        
+        const command = transcript.toLowerCase().trim();
+        console.log('Global command detected:', command);
+        
+        // Check for wake words to activate voice control
+        const wakeWords = ['hey tv', 'tv assistant', 'voice control', 'activate voice', 'start listening'];
+        
+        for (const wakeWord of wakeWords) {
+            if (command.includes(wakeWord)) {
+                console.log('Wake word detected:', wakeWord);
+                activateVoiceControl();
+                return;
+            }
+        }
+    };
+    
+    globalRecognition.onerror = function(event) {
+        console.error('Global speech recognition error:', event.error);
+        showWakeWordStatus('error');
+        // Restart global listening on error
+        setTimeout(() => {
+            if (document.getElementById('voicePanel').style.display === 'none') {
+                startGlobalListening();
+            }
+        }, 2000);
+    };
+}
+
+// Start global listening for wake word
+function startGlobalListening() {
+    if (globalRecognition && !isGlobalListening && !isListening) {
+        try {
+            globalRecognition.start();
+        } catch (e) {
+            console.error('Failed to start global recognition:', e);
+        }
+    }
+}
+
+// Stop global listening
+function stopGlobalListening() {
+    if (globalRecognition && isGlobalListening) {
+        try {
+            globalRecognition.stop();
+        } catch (e) {
+            console.error('Failed to stop global recognition:', e);
+        }
+    }
+}
+
+// Activate voice control panel
+function activateVoiceControl() {
+    const voicePanel = document.getElementById('voicePanel');
+    
+    if (voicePanel.style.display === 'none') {
+        // Stop global listening
+        stopGlobalListening();
+        
+        // Hide wake word status
+        hideWakeWordStatus();
+        
+        // Show voice panel
+        voicePanel.style.display = 'block';
+        
+        // Initialize voice recognition if not already done
+        if (!recognition) {
+            initializeVoiceRecognition();
+        }
+        
+        // Start listening for commands
+        setTimeout(() => {
+            startListening();
+        }, 100);
+        
+        // Provide audio feedback
+        speakFeedback('Voice control activated. You can now give commands.');
+    }
+}
+
+// Speak feedback for voice activation
+function speakFeedback(message) {
+    if (speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        speechSynthesis.speak(utterance);
+    }
+}
+
+// Show wake word status indicator
+function showWakeWordStatus(status = 'listening') {
+    const statusElement = document.getElementById('wakeWordStatus');
+    const iconElement = document.getElementById('wakeWordIcon');
+    const textElement = document.getElementById('wakeWordText');
+    
+    if (statusElement) {
+        statusElement.style.display = 'flex';
+        statusElement.className = `wake-word-status ${status}`;
+        
+        if (status === 'listening') {
+            iconElement.textContent = '🎤';
+            textElement.textContent = 'Listening for wake word';
+        } else if (status === 'error') {
+            iconElement.textContent = '⚠️';
+            textElement.textContent = 'Voice recognition error';
+        }
+    }
+}
+
+// Hide wake word status indicator
+function hideWakeWordStatus() {
+    const statusElement = document.getElementById('wakeWordStatus');
+    if (statusElement) {
+        statusElement.style.display = 'none';
+    }
+}
+
 // Toggle voice control
 function toggleVoice() {
     const voicePanel = document.getElementById('voicePanel');
     
     if (voicePanel.style.display === 'none') {
-        voicePanel.style.display = 'block';
-        if (!recognition) {
-            initializeVoiceRecognition();
-        }
-        // Always start listening when opening voice panel
-        setTimeout(() => {
-            startListening();
-        }, 100);
+        activateVoiceControl();
     } else {
         voicePanel.style.display = 'none';
         if (isListening && recognition) {
@@ -183,6 +331,11 @@ function toggleVoice() {
         if (speechSynthesis) {
             speechSynthesis.cancel();
         }
+        
+        // Restart global listening
+        setTimeout(() => {
+            startGlobalListening();
+        }, 500);
     }
 }
 
@@ -201,6 +354,13 @@ function startListening() {
 function processVoiceCommand(transcript) {
     const command = transcript.toLowerCase().trim();
     console.log('Processing command:', command);
+    
+    // Check for commands to close voice control
+    if (command.includes('close voice') || command.includes('stop listening') || command.includes('exit voice')) {
+        toggleVoice();
+        showVoiceFeedback('Voice control closed', 'success');
+        return;
+    }
     
     // Date commands - "show me friday july 11", etc.
     if (command.includes('show me')) {
@@ -224,6 +384,7 @@ function processVoiceCommand(transcript) {
                 // If we match at least 2 parts (e.g., "friday" and "11" or "july" and "11")
                 if (matches >= 2) {
                     document.getElementById('dateSelector').value = i.toString();
+                    wasVoiceTriggered = true; // Mark as voice triggered
                     scrapeListings(true);
                     showVoiceFeedback(`Getting listings for ${availableDates[i]}...`, 'success');
                     dateFound = true;
@@ -401,6 +562,7 @@ async function scrapeListings() {
                 setTimeout(() => {
                     speakListings(true);
                 }, 1000); // Give time for the page to update
+                wasVoiceTriggered = false; // Reset flag
             }
         } else {
             showAlert('Failed to scrape listings. Please try again.', 'error');
@@ -565,8 +727,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize date selector with proper labels
     initializeDateSelector();
     
+    // Initialize global voice recognition for wake word
+    initializeGlobalVoiceRecognition();
+    
+    // Start global listening after a short delay
+    setTimeout(() => {
+        startGlobalListening();
+    }, 2000);
+    
     // Add event listeners for filters
     document.getElementById('networkFilter').addEventListener('change', filterListings);
     document.getElementById('timeFilter').addEventListener('change', filterListings);
     document.getElementById('typeFilter').addEventListener('change', filterListings);
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+        // Ctrl/Cmd + V to activate voice control
+        if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+            event.preventDefault();
+            activateVoiceControl();
+        }
+        
+        // Escape to close voice control
+        if (event.key === 'Escape') {
+            const voicePanel = document.getElementById('voicePanel');
+            if (voicePanel.style.display !== 'none') {
+                toggleVoice();
+            }
+        }
+    });
 });

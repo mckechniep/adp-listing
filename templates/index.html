@@ -14,6 +14,12 @@
         </div>
     </div>
     
+    <!-- Wake Word Status Indicator -->
+    <div id="wakeWordStatus" class="wake-word-status" style="display: none;" role="status" aria-live="polite">
+        <span id="wakeWordIcon" aria-hidden="true">🎤</span>
+        <span id="wakeWordText">Listening for wake word</span>
+    </div>
+    
     <div class="container">
         <div id="alerts"></div>
         
@@ -58,10 +64,10 @@
                 <button id="scrapeBtn" class="btn-primary" onclick="scrapeListings()">
                     📺 Get TV Listings
                 </button>
-                <button id="voiceBtn" class="btn-primary" onclick="toggleVoice()">
+                <button id="voiceBtn" class="btn-primary" onclick="toggleVoice()" aria-label="Toggle voice control panel">
                     🎤 Voice Control
                 </button>
-                <button id="readBtn" class="btn-primary" onclick="toggleReading()" style="display: none;">
+                <button id="readBtn" class="btn-primary" onclick="toggleReading()" style="display: none;" aria-label="Read TV listings aloud">
                     🔊 Read Listings
                 </button>
             </div>
@@ -75,6 +81,19 @@
                 <div id="voiceTranscript" class="voice-transcript"></div>
                 <div class="voice-help">
                     <h3>🎯 Voice Commands</h3>
+                    
+                    <div class="command-section">
+                        <h4>🔊 Wake Word Commands:</h4>
+                        <p><strong>To activate voice control hands-free, say any of these:</strong></p>
+                        <ul>
+                            <li>"Hey TV"</li>
+                            <li>"TV Assistant"</li>
+                            <li>"Voice Control"</li>
+                            <li>"Activate Voice"</li>
+                            <li>"Start Listening"</li>
+                        </ul>
+                        <p class="command-note">💡 The app continuously listens for these wake words in the background</p>
+                    </div>
                     
                     <div class="command-section">
                         <h4>📅 All TV Listings By Date:</h4>
@@ -114,6 +133,23 @@
                             <li><strong>"Show me movies"</strong> - Filters to show only movies</li>
                             <li><strong>"Show me all programs"</strong> - Shows all programs</li>
                             <li><strong>"Show me everything"</strong> - Shows all programs</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="command-section">
+                        <h4>🔇 Close Voice Control:</h4>
+                        <ul>
+                            <li><strong>"Close voice"</strong> - Closes voice control panel</li>
+                            <li><strong>"Stop listening"</strong> - Stops voice recognition</li>
+                            <li><strong>"Exit voice"</strong> - Exits voice control mode</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="command-section">
+                        <h4>⌨️ Keyboard Shortcuts:</h4>
+                        <ul>
+                            <li><strong>Ctrl/Cmd + V</strong> - Activate voice control</li>
+                            <li><strong>Escape</strong> - Close voice control</li>
                         </ul>
                     </div>
                 </div>
