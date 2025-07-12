@@ -96,7 +96,7 @@ function addSpeechSynthesisButton() {
     button.addEventListener('click', function() {
         if (window.speechSynthesis) {
             speechSynthesisEnabled = true;
-            const testUtterance = new SpeechSynthesisUtterance('Speech synthesis enabled. You can now use voice commands to read TV listings.');
+            const testUtterance = new SpeechSynthesisUtterance('Speech synthesis enabled');
             testUtterance.onend = function() {
                 showVoiceFeedback('Speech synthesis enabled! You can now use voice commands.', 'success');
                 button.style.display = 'none';
@@ -344,7 +344,7 @@ function initializeVoiceRecognition() {
     }
     
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.continuous = false;
+    recognition.continuous = true; // Keep listening continuously for multiple commands
     recognition.interimResults = true;
     recognition.lang = 'en-US';
     
@@ -361,6 +361,13 @@ function initializeVoiceRecognition() {
         document.getElementById('voiceBtn').classList.remove('active');
         document.getElementById('voiceStatusIcon').classList.remove('listening');
         document.getElementById('voiceStatusText').textContent = 'Click to start listening';
+        
+        // Restart listening automatically if voice panel is still open
+        setTimeout(() => {
+            if (document.getElementById('voicePanel').style.display !== 'none' && !isReading) {
+                startListening();
+            }
+        }, 1000);
     };
     
     recognition.onresult = function(event) {
@@ -454,23 +461,7 @@ function initializeGlobalVoiceRecognition() {
             }
         }
         
-        // Check for "stop reading" command that works even in wake word mode
-        else if (command.includes('stop reading') || command.includes('stop speaking') || 
-                 command.includes('be quiet') || command.includes('stop talking') ||
-                 command.includes('shut up') || command.includes('quiet') ||
-                 command.includes('stop talking') || command.includes('pause reading')) {
-            
-            console.log('Stop reading command detected in wake word mode:', command);
-            
-            if (isReading && speechSynthesis) {
-                speechSynthesis.cancel();
-                isReading = false;
-                updateReadButton();
-                showVoiceFeedback('Stopped reading', 'success');
-            } else {
-                showVoiceFeedback('Not currently reading', 'info');
-            }
-        }
+
         
         // Check for "reset" or "start over" commands
         else if (command.includes('reset') || command.includes('start over') || 
@@ -553,7 +544,7 @@ function activateVoiceControl() {
         }, 100);
         
         // Provide audio feedback
-        speakFeedback('Voice control activated. You can now give commands.');
+        speakFeedback('Voice Control Activated');
     }
 }
 
@@ -676,57 +667,9 @@ function processVoiceCommand(transcript) {
             }
         }
         
-        // If no date found, check for network/type filters
+        // If no date found, provide helpful feedback
         if (!dateFound) {
-            const networks = ['ABC', 'CBS', 'NBC', 'FOX', 'CW', 'Discovery', 'Hallmark', 'HGTV', 'History', 'TBS', 'TNT', 'USA', 'SYFY', 'TLC', 'E!', 'NIK', 'TCM', 'Telemundo', 'truTV', 'HFAM', 'HMYS'];
-            let networkFound = false;
-            
-            for (const network of networks) {
-                if (command.toLowerCase().includes(network.toLowerCase())) {
-                    document.getElementById('networkFilter').value = network;
-                    filterListings();
-                    showVoiceFeedback(`Showing ${network} programs`, 'success');
-                    networkFound = true;
-                    commandProcessed = true;
-                    
-                    // Trigger auto-read after a short delay to let the UI update
-                    setTimeout(() => {
-                        speakListings(true);
-                    }, 500);
-                    
-                    break;
-                }
-            }
-            
-            // Type filters
-            if (!networkFound) {
-                if (command.includes('movies')) {
-                    document.getElementById('typeFilter').value = 'movies';
-                    filterListings();
-                    showVoiceFeedback('Showing movies only', 'success');
-                    commandProcessed = true;
-                    
-                    // Trigger auto-read
-                    setTimeout(() => {
-                        speakListings(true);
-                    }, 500);
-                    
-                } else if (command.includes('all programs') || command.includes('everything')) {
-                    document.getElementById('typeFilter').value = '';
-                    document.getElementById('networkFilter').value = '';
-                    filterListings();
-                    showVoiceFeedback('Showing all programs', 'success');
-                    commandProcessed = true;
-                    
-                    // Trigger auto-read
-                    setTimeout(() => {
-                        speakListings(true);
-                    }, 500);
-                    
-                } else {
-                    showVoiceFeedback('Try "Show me Friday July 11" or "Show me NBC"', 'error');
-                }
-            }
+            showVoiceFeedback('Try "Show me Friday July 11" for date-based listings', 'error');
         }
         
         // If we processed a command that will auto-read, don't restart listening
@@ -776,25 +719,7 @@ function processVoiceCommand(transcript) {
         }
     }
     
-    // Stop reading command
-    else if (command.includes('stop reading') || command.includes('stop speaking') || 
-             command.includes('be quiet') || command.includes('stop talking') ||
-             command.includes('shut up') || command.includes('quiet') ||
-             command.includes('pause reading') || command.includes('stop talking') ||
-             command.includes('enough') || command.includes('that\'s enough') ||
-             command.includes('stop it') || command.includes('cut it out')) {
-        
-        console.log('Stop reading command detected:', command);
-        
-        if (isReading && speechSynthesis) {
-            speechSynthesis.cancel();
-            isReading = false;
-            updateReadButton();
-            showVoiceFeedback('Stopped reading', 'success');
-        } else {
-            showVoiceFeedback('Not currently reading', 'info');
-        }
-    }
+
     
     // Reset/start over commands
     else if (command.includes('reset') || command.includes('start over') || 
@@ -819,24 +744,11 @@ function processVoiceCommand(transcript) {
     }
     
     else {
-        showVoiceFeedback('Try saying "Show me Friday July 11", "Show me NBC", "Read listings", "Stop reading", or "Reset"', 'error');
+        showVoiceFeedback('Try saying "Show me Friday July 11", "Read listings", or "Reset"', 'error');
     }
     
-    // Restart listening for commands that don't auto-read
-    if (!command.includes('read listing') && !command.includes('stop reading')) {
-        setTimeout(() => {
-            if (document.getElementById('voicePanel').style.display !== 'none') {
-                startListening();
-            }
-        }, 2000);
-    } else {
-        // For read commands, restart listening after a shorter delay
-        setTimeout(() => {
-            if (document.getElementById('voicePanel').style.display !== 'none') {
-                startListening();
-            }
-        }, 1000);
-    }
+    // No need to restart listening since we're using continuous mode
+    // The voice recognition will keep listening automatically
 }
 
 // Show voice feedback
