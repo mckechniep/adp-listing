@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Listings Scraper</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>📺 TV Listings Scraper</h1>
+            <p>Audio Description Project - TV Schedule Data Extractor</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="alerts"></div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="dateSelector">Select Date:</label>
+                    <select id="dateSelector">
+                        <option value="0">Today</option>
+                        <option value="1">Tomorrow</option>
+                        <option value="2">Day After Tomorrow</option>
+                        <option value="3">3 Days from Now</option>
+                        <option value="4">4 Days from Now</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="networkFilter">Filter by Network:</label>
+                    <select id="networkFilter">
+                        <option value="">All Networks</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="timeFilter">Filter by Time:</label>
+                    <select id="timeFilter">
+                        <option value="">All Times</option>
+                        <option value="morning">Morning (6 AM - 12 PM)</option>
+                        <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
+                        <option value="prime">Prime Time (6 PM - 11 PM)</option>
+                        <option value="late">Late Night (11 PM - 6 AM)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="typeFilter">Filter by Type:</label>
+                    <select id="typeFilter">
+                        <option value="">All Programs</option>
+                        <option value="movies">Movies Only</option>
+                        <option value="series">Series Only</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="scrapeBtn" class="btn-primary" onclick="scrapeListings()">
+                    🔄 Scrape Latest Data
+                </button>
+                <button id="downloadCsvBtn" class="btn-success" onclick="downloadData('csv')" disabled>
+                    📥 Download CSV
+                </button>
+                <button id="downloadJsonBtn" class="btn-warning" onclick="downloadData('json')" disabled>
+                    📥 Download JSON
+                </button>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-item">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total Listings</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="networkCount">0</div>
+                <div class="stat-label">Networks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="movieCount">0</div>
+                <div class="stat-label">Movies</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="lastUpdated">-</div>
+                <div class="stat-label">Last Updated</div>
+            </div>
+        </div>
+        
+        <div class="results">
+            <h2>TV Listings <span id="currentDateDisplay" style="color: #3498db; font-size: 0.8em;"></span></h2>
+            <div id="resultsContent">
+                <div class="no-data">
+                    <p>No data available. Click "Scrape Latest Data" to fetch TV listings.</p>
+                    <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                        This scraper extracts TV listings data for today and the next 4 days.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
