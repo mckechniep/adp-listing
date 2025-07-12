@@ -31,33 +31,6 @@
                         <option value="0">Loading dates...</option>
                     </select>
                 </div>
-                
-                <div class="control-group">
-                    <label for="networkFilter">Filter by Network:</label>
-                    <select id="networkFilter">
-                        <option value="">All Networks</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="timeFilter">Filter by Time:</label>
-                    <select id="timeFilter">
-                        <option value="">All Times</option>
-                        <option value="morning">Morning (6 AM - 12 PM)</option>
-                        <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
-                        <option value="prime">Prime Time (6 PM - 11 PM)</option>
-                        <option value="late">Late Night (11 PM - 6 AM)</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="typeFilter">Filter by Type:</label>
-                    <select id="typeFilter">
-                        <option value="">All Programs</option>
-                        <option value="movies">Movies Only</option>
-                        <option value="series">Series Only</option>
-                    </select>
-                </div>
             </div>
             
             <div class="button-group">
@@ -181,11 +154,46 @@
             </div>
         </div>
         
+        <!-- Filters Section - Only shown when listings are available -->
+        <div id="filtersSection" class="filters-section" style="display: none;">
+            <h3>🔍 Filter Listings</h3>
+            <p class="filter-description">Use these filters to narrow down the listings after getting results:</p>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="networkFilter">Filter by Network:</label>
+                    <select id="networkFilter">
+                        <option value="">All Networks</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="timeFilter">Filter by Time:</label>
+                    <select id="timeFilter">
+                        <option value="">All Times</option>
+                        <option value="morning">Morning (6 AM - 12 PM)</option>
+                        <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
+                        <option value="prime">Prime Time (6 PM - 11 PM)</option>
+                        <option value="late">Late Night (11 PM - 6 AM)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="typeFilter">Filter by Type:</label>
+                    <select id="typeFilter">
+                        <option value="">All Programs</option>
+                        <option value="movies">Movies Only</option>
+                        <option value="series">Series Only</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
         <div class="results">
             <h2>TV Listings <span id="currentDateDisplay" style="color: #3498db; font-size: 0.8em;"></span></h2>
             <div id="resultsContent">
                 <div class="no-data">
-                    <p>No data available. Click "Scrape Latest Data" to fetch TV listings.</p>
+                    <p>No data available. Click "Get TV Listings" to fetch TV listings.</p>
                     <p style="margin-top: 10px; color: #666; font-size: 14px;">
                         This scraper extracts TV listings data for today and the next 4 days.
                     </p>

@@ -859,6 +859,9 @@ async function scrapeListings() {
             // Show read button
             document.getElementById('readBtn').style.display = 'inline-flex';
             
+            // Show filters section
+            document.getElementById('filtersSection').style.display = 'block';
+            
             let message = `Successfully retrieved ${data.listings.length} listings`;
             if (data.current_date) {
                 message += ` for ${data.current_date}`;
@@ -884,10 +887,16 @@ async function scrapeListings() {
                     </p>
                 </div>
             `;
+            
+            // Hide filters section on error
+            document.getElementById('filtersSection').style.display = 'none';
         }
     } catch (error) {
         showAlert('Network error. Please check your connection.', 'error');
         console.error('Error:', error);
+        
+        // Hide filters section on network error
+        document.getElementById('filtersSection').style.display = 'none';
     } finally {
         scrapeBtn.disabled = false;
     }

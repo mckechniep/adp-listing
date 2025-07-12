@@ -283,6 +283,64 @@ tr:hover {
     margin-top: 20px;
 }
 
+/* Filters Section */
+.filters-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    border-left: 4px solid #3498db;
+}
+
+.filters-section h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.filter-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+    font-style: italic;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+    background-color: #f8f9fa;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    background-color: white;
+}
+
 /* Wake Word Status Indicator */
 .wake-word-status {
     position: fixed;
@@ -521,5 +579,18 @@ tr:hover {
     .command-section {
         margin-bottom: 20px;
         padding-bottom: 15px;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .filters-section {
+        padding: 20px;
     }
 }
