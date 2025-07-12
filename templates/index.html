@@ -74,16 +74,48 @@
                 </div>
                 <div id="voiceTranscript" class="voice-transcript"></div>
                 <div class="voice-help">
-                    <p><strong>Available Commands:</strong></p>
-                    <ul id="voiceHelpList">
-                        <li>Loading available dates...</li>
-                    </ul>
-                    <p style="margin-top: 10px;"><strong>Other Commands:</strong></p>
-                    <ul>
-                        <li>"Show me NBC" / "Show me CBS" (any network)</li>
-                        <li>"Show me movies" / "Show me all programs"</li>
-                        <li>"Clear filters"</li>
-                    </ul>
+                    <h3>🎯 Voice Commands</h3>
+                    
+                    <div class="command-section">
+                        <h4>📅 All TV Listings By Date:</h4>
+                        <ul>
+                            <li><strong>"Show me [date]"</strong> - e.g., "Show me Friday July 11"</li>
+                            <li><strong>"Show [date]"</strong> - Works without "me" as well</li>
+                        </ul>
+                        <p class="command-note">💡 Date matching is flexible - matches at least 2 parts (e.g., "Friday" + "11" or "July" + "12")</p>
+                    </div>
+                    
+                    <div class="command-section">
+                        <h4>📺 Network Filter Commands:</h4>
+                        <p><strong>"Show me [network]"</strong> - Works with any of these networks:</p>
+                        <div class="network-grid">
+                            <div class="network-group">
+                                <strong>Major Networks:</strong>
+                                <ul>
+                                    <li>ABC, CBS, NBC, FOX, CW</li>
+                                </ul>
+                            </div>
+                            <div class="network-group">
+                                <strong>Cable Networks:</strong>
+                                <ul>
+                                    <li>Discovery, Hallmark, HGTV, History</li>
+                                    <li>TBS, TNT, USA, SYFY, TLC</li>
+                                    <li>E!, NIK, TCM, Telemundo</li>
+                                    <li>truTV, HFAM, HMYS</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="command-examples"><strong>Examples:</strong> "Show me NBC", "Show me Hallmark", "Show me Discovery"</p>
+                    </div>
+                    
+                    <div class="command-section">
+                        <h4>🎬 Content Filter Commands:</h4>
+                        <ul>
+                            <li><strong>"Show me movies"</strong> - Filters to show only movies</li>
+                            <li><strong>"Show me all programs"</strong> - Shows all programs</li>
+                            <li><strong>"Show me everything"</strong> - Shows all programs</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

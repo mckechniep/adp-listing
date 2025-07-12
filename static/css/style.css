@@ -274,6 +274,136 @@ tr:hover {
     color: #666;
 }
 
+/* Voice Panel */
+.voice-panel {
+    background: #f8f9fa;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.voice-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.voice-transcript {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+    min-height: 60px;
+    font-style: italic;
+    color: #666;
+}
+
+.voice-help {
+    background: white;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+.voice-help h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.command-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.command-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.command-section h4 {
+    color: #3498db;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.command-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.command-section li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.command-section li:before {
+    content: "•";
+    color: #3498db;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.network-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 15px 0;
+}
+
+.network-group {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+.network-group strong {
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.network-group ul {
+    margin: 0;
+}
+
+.network-group li {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.command-note {
+    background: #e8f4fd;
+    border-left: 4px solid #3498db;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 0 5px 5px 0;
+    font-size: 0.9em;
+    color: #2c3e50;
+}
+
+.command-examples {
+    background: #f0f8ff;
+    border-left: 4px solid #27ae60;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 0 5px 5px 0;
+    font-size: 0.9em;
+    color: #2c3e50;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .control-row {
@@ -305,5 +435,19 @@ tr:hover {
     
     .stat-item:last-child {
         border-bottom: none;
+    }
+    
+    .network-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .voice-help {
+        padding: 15px;
+    }
+    
+    .command-section {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
     }
 }
