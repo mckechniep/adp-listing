@@ -22,11 +22,7 @@
                 <div class="control-group">
                     <label for="dateSelector">Select Date:</label>
                     <select id="dateSelector">
-                        <option value="0">Today</option>
-                        <option value="1">Tomorrow</option>
-                        <option value="2">Day After Tomorrow</option>
-                        <option value="3">3 Days from Now</option>
-                        <option value="4">4 Days from Now</option>
+                        <option value="0">Loading dates...</option>
                     </select>
                 </div>
                 
@@ -60,14 +56,36 @@
             
             <div class="button-group">
                 <button id="scrapeBtn" class="btn-primary" onclick="scrapeListings()">
-                    🔄 Scrape Latest Data
+                    📺 Get TV Listings
                 </button>
-                <button id="downloadCsvBtn" class="btn-success" onclick="downloadData('csv')" disabled>
-                    📥 Download CSV
+                <button id="voiceBtn" class="btn-primary" onclick="toggleVoice()">
+                    🎤 Voice Control
                 </button>
-                <button id="downloadJsonBtn" class="btn-warning" onclick="downloadData('json')" disabled>
-                    📥 Download JSON
+                <button id="readBtn" class="btn-primary" onclick="toggleReading()" style="display: none;">
+                    🔊 Read Listings
                 </button>
+            </div>
+            
+            <!-- Voice Control Panel -->
+            <div id="voicePanel" class="voice-panel" style="display: none;">
+                <div class="voice-status">
+                    <span id="voiceStatusIcon">🎤</span>
+                    <span id="voiceStatusText">Click to start listening</span>
+                </div>
+                <div id="voiceTranscript" class="voice-transcript"></div>
+                <div class="voice-help">
+                    <p><strong>Available Commands:</strong></p>
+                    <ul>
+                        <li>"Show me Friday July 11"</li>
+                        <li>"Show me Saturday July 12"</li>
+                        <li>"Show me Sunday July 13"</li>
+                        <li>"Show me Monday July 14"</li>
+                        <li>"Show me Tuesday July 15"</li>
+                        <li>"Show me NBC" / "Show me CBS" (any network)</li>
+                        <li>"Show me movies" / "Show me all programs"</li>
+                        <li>"Clear filters"</li>
+                    </ul>
+                </div>
             </div>
         </div>
         
