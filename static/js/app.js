@@ -360,9 +360,32 @@ function updateReadButton() {
 
 // Helper function to convert time to 24-hour format
 function timeTo24Hour(timeStr) {
-    const hour = parseInt(timeStr.split(':')[0]);
-    const isPM = timeStr.includes('PM');
-    return isPM && hour !== 12 ? hour + 12 : (!isPM && hour === 12 ? 0 : hour);
+    // Handle edge cases and normalize input
+    const cleanTime = timeStr.trim().toUpperCase();
+    
+    // Extract hour and minute parts
+    const parts = cleanTime.split(':');
+    let hour = parseInt(parts[0]);
+    const minute = parts.length > 1 ? parseInt(parts[1]) : 0;
+    
+    // Check for AM/PM
+    const isPM = cleanTime.includes('PM');
+    const isAM = cleanTime.includes('AM');
+    
+    // Handle 12-hour format conversion
+    if (isPM && hour !== 12) {
+        hour += 12;
+    } else if (isAM && hour === 12) {
+        hour = 0;
+    }
+    
+    // Ensure hour is in valid range
+    if (hour < 0 || hour > 23) {
+        console.warn('Invalid hour in time:', timeStr, 'using 0');
+        hour = 0;
+    }
+    
+    return hour;
 }
 
 // Helper function to check if a listing is in a specific time period
@@ -413,32 +436,160 @@ function readListingsByTime(timePeriod) {
     speakSpecificListings(timeFilteredListings, true, timePeriod);
 }
 
+// Check if command contains time-based reading request
+function isTimeBasedCommand(command) {
+    const timeKeywords = ['read', 'show', 'tell', 'speak', 'what'];
+    const contentKeywords = ['listings', 'shows', 'programs', 'tv', 'television', 'schedule'];
+    const timeIndicators = ['from', 'between', 'to', 'until', 'through'];
+    
+    // Check if command contains "read" + content + time indicators
+    const hasReadKeyword = timeKeywords.some(keyword => command.includes(keyword));
+    const hasContentKeyword = contentKeywords.some(keyword => command.includes(keyword));
+    const hasTimeIndicator = timeIndicators.some(indicator => command.includes(indicator));
+    
+    // Also check for specific time patterns
+    const timePattern = /\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?/i;
+    const hasTimePattern = timePattern.test(command);
+    
+    return hasReadKeyword && (hasContentKeyword || hasTimePattern) && (hasTimeIndicator || hasTimePattern);
+}
+
+// Robust time parsing function for voice commands
+function parseTimeFromVoice(timeStr) {
+    if (!timeStr) return null;
+    
+    // Clean up the input
+    let cleanTime = timeStr.trim().toLowerCase();
+    
+    // Handle various voice recognition quirks
+    cleanTime = cleanTime
+        .replace(/\./g, ':')  // Convert decimal points to colons
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .replace(/p\.m\./g, 'pm')  // Handle "p.m." -> "pm"
+        .replace(/a\.m\./g, 'am')  // Handle "a.m." -> "am"
+        .replace(/p m/g, 'pm')     // Handle "p m" -> "pm"
+        .replace(/a m/g, 'am')     // Handle "a m" -> "am"
+        .replace(/o'clock/g, '')   // Remove "o'clock"
+        .replace(/oclock/g, '')    // Remove "oclock"
+        .replace(/zero/g, '0')     // Handle "zero" -> "0"
+        .replace(/oh/g, '0');      // Handle "oh" -> "0"
+    
+    console.log('Cleaned time string:', cleanTime);
+    
+    // Extract hour and minute
+    let hour, minute = 0;
+    
+    // Try to match various time formats
+    const patterns = [
+        /(\d{1,2}):(\d{2})\s*(am|pm)?/,  // 7:30 pm
+        /(\d{1,2})\s*(am|pm)/,           // 7 pm
+        /(\d{1,2})/,                     // 7 (just hour)
+        /(\d{1,2})\s*(\d{2})\s*(am|pm)?/ // 7 30 pm
+    ];
+    
+    for (const pattern of patterns) {
+        const match = cleanTime.match(pattern);
+        if (match) {
+            hour = parseInt(match[1]);
+            if (match[2] && !match[3]) {
+                // If second group is minutes (not am/pm)
+                minute = parseInt(match[2]);
+            } else if (match[3]) {
+                // If third group is am/pm
+                const period = match[3];
+                if (period === 'pm' && hour !== 12) {
+                    hour += 12;
+                } else if (period === 'am' && hour === 12) {
+                    hour = 0;
+                }
+            }
+            break;
+        }
+    }
+    
+    // If no AM/PM found, try to infer from context
+    if (!cleanTime.includes('am') && !cleanTime.includes('pm')) {
+        // Assume PM for hours 1-11, AM for 12, PM for 13-23
+        if (hour >= 1 && hour <= 11) {
+            // Could be either AM or PM, but PM is more common for TV listings
+            // Let's assume PM for evening hours (6-11) and AM for morning hours (1-5)
+            if (hour >= 6 && hour <= 11) {
+                hour += 12; // Convert to PM
+            }
+        } else if (hour === 12) {
+            // 12 could be noon or midnight, assume noon (PM)
+            hour = 12;
+        }
+    }
+    
+    // Validate hour
+    if (hour < 0 || hour > 23) {
+        console.warn('Invalid hour:', hour, 'from time string:', timeStr);
+        return null;
+    }
+    
+    return { hour, minute };
+}
+
 // Read listings by specific time range
 function readListingsByTimeRange(command) {
+    console.log('readListingsByTimeRange called with command:', command);
+    
     const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+    console.log('listingsToRead length:', listingsToRead.length);
     
     if (listingsToRead.length === 0) {
+        console.log('No listings to read');
         showVoiceFeedback('No listings to read. Please get listings first.', 'error');
         return;
     }
     
-    // Extract time range from command (basic implementation)
-    // This could be enhanced with more sophisticated time parsing
-    const timeMatch = command.match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)\s*(?:to|until|-)\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)/i);
+    // Try multiple regex patterns to extract time range
+    const patterns = [
+        // Standard format: "from X to Y"
+        /(?:from\s+)?(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)\s*(?:to|until|-|through)\s*(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)/i,
+        // Alternative: "between X and Y"
+        /between\s+(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)\s+and\s+(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)/i,
+        // Simple: "X to Y"
+        /(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)\s*(?:to|until|-)\s*(\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?)/i
+    ];
+    
+    let timeMatch = null;
+    for (const pattern of patterns) {
+        timeMatch = command.match(pattern);
+        if (timeMatch) {
+            console.log('Matched pattern:', pattern);
+            break;
+        }
+    }
+    
+    console.log('timeMatch result:', timeMatch);
     
     if (!timeMatch) {
-        showVoiceFeedback('Please specify a time range like "Read listings from 7 PM to 10 PM"', 'error');
+        console.log('No time match found for command:', command);
+        showVoiceFeedback('Try saying "Read shows from 7 PM to 10 PM" or "Read listings between 8 and 11 PM"', 'error');
         return;
     }
     
-    const startTime = timeMatch[1];
-    const endTime = timeMatch[2];
+    // Parse the times using our robust parser
+    const startTimeParsed = parseTimeFromVoice(timeMatch[1]);
+    const endTimeParsed = parseTimeFromVoice(timeMatch[2]);
+    
+    if (!startTimeParsed || !endTimeParsed) {
+        console.log('Failed to parse times:', { start: timeMatch[1], end: timeMatch[2] });
+        showVoiceFeedback('Could not understand the time format. Try "Read shows from 7 PM to 10 PM"', 'error');
+        return;
+    }
+    
+    console.log('Parsed times:', { start: startTimeParsed, end: endTimeParsed });
     
     // Filter listings by time range
     const rangeFilteredListings = listingsToRead.filter(listing => {
         const listingHour = timeTo24Hour(listing.time);
-        const startHour = timeTo24Hour(startTime);
-        const endHour = timeTo24Hour(endTime);
+        const startHour = startTimeParsed.hour;
+        const endHour = endTimeParsed.hour;
+        
+        console.log('Comparing:', { listing: listing.time, listingHour, startHour, endHour });
         
         // Handle overnight ranges
         if (endHour < startHour) {
@@ -449,15 +600,21 @@ function readListingsByTimeRange(command) {
     });
     
     if (rangeFilteredListings.length === 0) {
-        showVoiceFeedback(`No listings found between ${startTime} and ${endTime}.`, 'error');
+        const startDisplay = `${startTimeParsed.hour > 12 ? startTimeParsed.hour - 12 : startTimeParsed.hour}${startTimeParsed.hour >= 12 ? ' PM' : ' AM'}`;
+        const endDisplay = `${endTimeParsed.hour > 12 ? endTimeParsed.hour - 12 : endTimeParsed.hour}${endTimeParsed.hour >= 12 ? ' PM' : ' AM'}`;
+        showVoiceFeedback(`No listings found between ${startDisplay} and ${endDisplay}.`, 'error');
         return;
     }
     
     // Reset reading index for new time range
     lastReadIndex = 0;
     
+    // Create display strings for feedback
+    const startDisplay = `${startTimeParsed.hour > 12 ? startTimeParsed.hour - 12 : startTimeParsed.hour}${startTimeParsed.hour >= 12 ? ' PM' : ' AM'}`;
+    const endDisplay = `${endTimeParsed.hour > 12 ? endTimeParsed.hour - 12 : endTimeParsed.hour}${endTimeParsed.hour >= 12 ? ' PM' : ' AM'}`;
+    
     // Read the filtered listings
-    speakSpecificListings(rangeFilteredListings, true, `${startTime} to ${endTime}`);
+    speakSpecificListings(rangeFilteredListings, true, `${startDisplay} to ${endDisplay}`);
 }
 
 // Continue reading from where we left off
@@ -533,7 +690,7 @@ function speakListingsSummary() {
     
     if (totalListings > 0) {
         textToRead += `You can say "Read morning listings" for 6 AM to 12 PM shows, "Read afternoon listings" for 12 PM to 6 PM shows, "Read prime time listings" for 6 PM to 11 PM shows, or "Read late night listings" for 11 PM to 6 AM shows. `;
-        textToRead += `You can also say "Read listings from 8 PM to 11 PM" for a specific time range, or "Read all listings" to hear everything. `;
+        textToRead += `You can also say "Read shows from 8 PM to 11 PM" or "Read listings between 7 and 10 PM" for a specific time range, or "Read all listings" to hear everything. `;
         textToRead += `What would you like to hear?`;
     } else {
         textToRead += `No listings found for this date.`;
@@ -868,9 +1025,9 @@ function initializeGlobalVoiceRecognition() {
             console.log('Late night listings command detected in wake word mode:', command);
             readListingsByTime('late');
         }
-        // Specific time range commands
-        else if (command.includes('read listings from') || command.includes('read shows from')) {
-            console.log('Specific time range command detected in wake word mode:', command);
+        // Specific time range commands - more flexible detection
+        else if (isTimeBasedCommand(command)) {
+            console.log('Time-based command detected in wake word mode:', command);
             readListingsByTimeRange(command);
         }
         // Continue reading commands
@@ -1211,9 +1368,9 @@ function processVoiceCommand(transcript) {
         console.log('Late night listings command detected:', command);
         readListingsByTime('late');
     }
-    // Specific time range commands
-    else if (command.includes('read listings from') || command.includes('read shows from')) {
-        console.log('Specific time range command detected:', command);
+    // Specific time range commands - more flexible detection
+    else if (isTimeBasedCommand(command)) {
+        console.log('Time-based command detected:', command);
         readListingsByTimeRange(command);
     }
     // Continue reading commands

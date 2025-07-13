@@ -15,6 +15,37 @@
         </div>
     </div>
     
+    <!-- App Description Section -->
+    <div class="app-description">
+        <div class="container">
+            <div class="description-content">
+                <div class="description-icon">
+                    <img src="{{ url_for('static', filename='img/descriptv-logo-2.png') }}" 
+                         alt="Descrip-TV Logo" 
+                         class="description-logo" />
+                </div>
+                <div class="description-text">
+                    <h2>Making TV Accessible for Everyone</h2>
+                    <p>This web application helps people, particularly those who are visually impaired, find cable TV programs that feature <strong>audio descriptive services</strong>. Audio description (AD) is a narration service that describes visual elements of TV shows and movies for blind and visually impaired viewers, making television content more accessible and enjoyable.</p>
+                    <div class="description-features">
+                        <div class="feature">
+                            <span class="feature-icon">🎤</span>
+                            <span>Voice-controlled navigation</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">📺</span>
+                            <span>Audio description program listings</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">♿</span>
+                            <span>Accessible design for all users</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Wake Word Status Indicator -->
     <div id="wakeWordStatus" class="wake-word-status" style="display: none;" role="status" aria-live="polite">
         <span id="wakeWordIcon" aria-hidden="true">🎤</span>
@@ -75,57 +106,54 @@
                 </div>
                 <div id="voiceTranscript" class="voice-transcript"></div>
                 <div class="voice-help">
-                    <h3>🎯 Voice Commands</h3>
+                    <div class="voice-commands-header">
+                        <img src="{{ url_for('static', filename='img/audio-commands-vector.png') }}" 
+                             alt="Audio commands illustration" 
+                             class="voice-commands-icon" />
+                        <h3>Voice Commands</h3>
+                        <img src="{{ url_for('static', filename='img/audio-commands-vector.png') }}" 
+                             alt="Audio commands illustration" 
+                             class="voice-commands-icon" />
+                    </div>
                     
                     <div class="command-section">
-                        <h4>📅 Get TV Listings By Date:</h4>
+                        <div class="command-header">
+                            <img src="{{ url_for('static', filename='img/tv-listings-by-date.png') }}" 
+                                 alt="TV listings by date illustration" 
+                                 class="command-header-icon" />
+                            <h4>Get TV Listings By Date</h4>
+                        </div>
+                        <p class="command-note" style="font-weight: bold; font-size: .9em; color: #e74c3c;"> Use the following commands to get TV listings by date.<br>Date matching is flexible. Matching at least 2 parts is sufficient (e.g., "Friday" + "11" or "July" + "12").</p>
                         <ul>
                             <li><strong>"Show me TV listings for [date]"</strong> - e.g., "Show me today"</li>
                             <li><strong>"Show me [date]"</strong> - e.g., "Show me Friday July 11"</li>
                             <li><strong>"Show [date]"</strong> - Works without "me" as well</li>
                         </ul>
-                        <p class="command-note">💡 Date matching is flexible - matches at least 2 parts (e.g., "Friday" + "11" or "July" + "12"). The app will tell you how many listings were found and suggest voice commands to hear specific time periods.</p>
                     </div>
                     
-
+                    
                     
                     <div class="command-section">
-                        <h4>🔊 Read Listings Commands:</h4>
-                        <ul>
-                            <li><strong>"Read all listings"</strong> - Reads all listings aloud</li>
-                            <li><strong>"Read listings"</strong> - Reads first 20 listings</li>
-                            <li><strong>"Read the listings"</strong> - Alternative command</li>
-                            <li><strong>"Tell me the listings"</strong> - Another way to request reading</li>
-                            <li><strong>"Read results"</strong> - Reads filtered results</li>
-                        </ul>
-                        <p class="command-note">💡 Use these commands to hear listings read aloud. The app will automatically return to wake word listening after reading.</p>
-                    </div>
-                    
-                    <div class="command-section">
-                        <h4>⏰ Time-Based Reading Commands:</h4>
+                        <div class="command-header">
+                            <img src="{{ url_for('static', filename='img/time-based-reading-commands.png') }}" 
+                                 alt="Time-based reading commands illustration" 
+                                 class="command-header-icon" />
+                            <h4>Time-Based Reading Commands</h4>
+                        </div>
+                        <p class="command-note" style="font-weight: bold; font-size: .9em; color: #e74c3c;">The app will then tell you how many total TV listings were found for the date in question, before proceeding to list the voice commands that can be used to hear TV listings by their scheduled time.</p>
                         <ul>
                             <li><strong>"Read morning listings"</strong> - Reads 6 AM to 12 PM shows</li>
                             <li><strong>"Read afternoon listings"</strong> - Reads 12 PM to 6 PM shows</li>
                             <li><strong>"Read prime time listings"</strong> - Reads 6 PM to 11 PM shows</li>
                             <li><strong>"Read late night listings"</strong> - Reads 11 PM to 6 AM shows</li>
-                            <li><strong>"Read listings from 7 PM to 10 PM"</strong> - Custom time range</li>
+                            <li><strong>"Read shows from 7 PM to 10 PM"</strong> - Custom time range</li>
+                            <li><strong>"Read listings between 8 and 11 PM"</strong> - Alternative format</li>
+                            <li><strong>"Read TV shows from 6 to 9 PM"</strong> - Natural language</li>
                         </ul>
-                        <p class="command-note">💡 These commands help you focus on specific time periods without being overwhelmed by all listings.</p>
                     </div>
                     
                     <div class="command-section">
-                        <h4>📖 Continue Reading Commands:</h4>
-                        <ul>
-                            <li><strong>"Read next 10 listings"</strong> - Continues from where you left off</li>
-                            <li><strong>"Read more listings"</strong> - Alternative continue command</li>
-                            <li><strong>"Read remaining listings"</strong> - Reads all remaining listings</li>
-                            <li><strong>"Continue reading"</strong> - Another way to continue</li>
-                        </ul>
-                        <p class="command-note">💡 Use these commands to continue reading after the initial 20 listings, or to navigate through large sets of listings.</p>
-                    </div>
-                    
-                    <div class="command-section">
-                        <h4>🔄 Quick Read Again Commands:</h4>
+                        <h4>More Voice Commands</h4>
                         <ul>
                             <li><strong>"Read again"</strong> - Re-reads listings without saying wake word</li>
                             <li><strong>"Read it again"</strong> - Alternative quick command</li>
@@ -138,7 +166,7 @@
 
                     
                     <div class="command-section">
-                        <h4>🔄 Reset Commands:</h4>
+                        <h5>🔄 Reset Commands:</h5>
                         <ul>
                             <li><strong>"Reset"</strong> - Clears all filters and resets to all listings</li>
                             <li><strong>"Start over"</strong> - Alternative reset command</li>
@@ -146,11 +174,10 @@
                             <li><strong>"New search"</strong> - Resets for new search</li>
                             <li><strong>"Show all"</strong> - Shows all programs without filters</li>
                         </ul>
-                        <p class="command-note">💡 These commands work even when the app is listening for wake words - no need to say "Hey TV" first!</p>
                     </div>
                     
                     <div class="command-section">
-                        <h4>🔇 Close Voice Control:</h4>
+                        <h5>🔇 Close Voice Control Commands:</h5>
                         <ul>
                             <li><strong>"Close voice"</strong> - Closes voice control panel</li>
                             <li><strong>"Stop listening"</strong> - Stops voice recognition</li>
@@ -159,7 +186,7 @@
                     </div>
                     
                     <div class="command-section">
-                        <h4>⌨️ Keyboard Shortcuts:</h4>
+                        <h5>⌨️ Keyboard Shortcuts:</h5>
                         <ul>
                             <li><strong>Ctrl/Cmd + V</strong> - Activate voice control</li>
                             <li><strong>Escape</strong> - Close voice control</li>

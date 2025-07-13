@@ -1,7 +1,7 @@
 # Descrip-TV
 ## Audio Description TV Listings Scraper & Voice Assistant
 
-Descrip-TV is an accessible web app that helps users—especially those who are blind or visually impaired—find and explore TV listings with audio description. The app scrapes the latest TV schedule data from the [Audio Description Project](https://adp.acb.org) and provides a modern, voice-controlled interface for searching, filtering, and reading listings aloud.
+Descrip-TV is an accessible web app that helps users—especially those who are blind or visually impaired—find and explore TV listings with audio description (a narration service that describes visual elements of TV shows and movies for blind and visually impaired viewers). The app scrapes the latest TV schedule data from the [Audio Description Project](https://adp.acb.org) and provides a modern, voice-controlled interface for searching, filtering, and reading listings aloud.
 
 ![Descrip-TV header image](static/img/descrip-tv-header.png)
 
@@ -94,16 +94,94 @@ Descrip-TV is an accessible web app that helps users—especially those who are 
 
 ---
 
-## Voice Commands
+## Voice Command Manual
 
-- **Wake Words:** “Hey TV”, “TV Assistant”, “Voice Control”, “Activate Voice”, “Start Listening”
-- **Get Listings:** “Show me [date]”, “Show [date]”
-- **Read Listings:** “Read listings”, “Read all listings”, “Read morning listings”, “Read listings from 8 PM to 11 PM”, etc.
-- **Continue/Repeat:** “Read more listings”, “Read again”, “Repeat that”
-- **Reset:** “Reset”, “Start over”, “Show all”
-- **Close Voice Control:** “Close voice”, “Stop listening”, “Exit voice”
+Getting Started
 
-See the in-app help for a full list!
+1. **Wake Word Activation**: The app continuously listens for wake words in the background. Say any of these to activate voice control:
+  
+  * "TV Assistant"
+  * "Voice Control"
+  * "Activate Voice"
+  * "Start Listening"
+  * "Hey TV"
+2. **Enable Speech Synthesis**: When you first visit the app, you may need to enable speech synthesis by:
+  
+  * Clicking the red "Enable Speech Synthesis" button in the top-left corner, OR
+  * Pressing any key or tapping the screen
+
+### Example User Flow
+
+#### Step 1: Get TV Listings for a Specific Date
+
+**Say:** "TV Assistant" (or any wake word)**Then say:** "Show me Friday July 11" (or any date)
+
+**What happens:**
+
+* The app fetches TV listings for that date
+* You'll hear: "TV Listings for Friday, July 11. Found 113 TV listings. You can say 'Read morning listings' for 6 AM to 12 PM shows, 'Read afternoon listings' for 12 PM to 6 PM shows, 'Read prime time listings' for 6 PM to 11 PM shows, or 'Read late night listings' for 11 PM to 6 AM shows. You can also say 'Read shows from 8 PM to 11 PM' for a specific time range, or 'Read all listings' to hear everything. What would you like to hear?"
+
+#### Step 2: Hear Listings by Time Period
+
+**Say:** "Read morning listings"**What happens:** The app reads all TV shows with audio description from 6 AM to 12 PM
+
+**Alternative commands:**
+
+* "Read afternoon listings" (12 PM - 6 PM)
+* "Read prime time listings" (6 PM - 11 PM)
+* "Read late night listings" (11 PM - 6 AM)
+
+#### Step 3: Hear Specific Time Range
+
+**Say:** "Read shows from 7 PM to 10 PM"**What happens:** The app reads all TV shows with audio description between 7 PM and 10 PM
+
+**Alternative formats:**
+
+* "Read listings between 8 and 11 PM"
+* "Read TV shows from 6 to 9 PM"
+* "Read programs from 7 PM to 10 PM"
+
+#### Step 4: Quick Commands (No Wake Word Needed)
+
+**Say:** "Read again" (re-reads the last listings)**Say:** "Reset" (clears filters and shows all programs)
+
+#### Step 5: Close Voice Control
+
+**Say:** "Close voice" or "Stop listening"
+
+### Natural Language Examples
+
+The app understands various ways to phrase commands:
+
+**Getting listings:**
+
+* "Show me today"
+* "Show me Friday July 11"
+* "Show Friday July 11"
+* "Show me TV listings for July 12"
+
+**Reading listings:**
+
+* "Read morning listings"
+* "Read afternoon shows"
+* "Read prime time programs"
+* "Read TV shows from 7 PM to 10 PM"
+* "Read listings between 8 and 11 PM"
+* "Tell me what's on from 6 to 9 PM"
+
+**Quick actions:**
+
+* "Read again" (re-read without wake word)
+* "Reset" (clear filters)
+* "Close voice" (exit voice control)
+
+### Tips for Best Results
+
+1. **Speak clearly** and at a normal pace
+2. **Use natural language** - the app understands various phrasings
+3. **Be specific with times** - "7 PM to 10 PM" works better than "evening"
+4. **Wait for feedback** - the app will confirm your commands
+5. **Use wake words** to activate voice control, then speak your command
 
 ---
 
@@ -125,11 +203,14 @@ adp-listings/
 
 ---
 
-## Accessibility
+## Accessibility Features
 
-- Designed for screen readers and keyboard navigation
-- Large, high-contrast visuals
-- Voice-first interaction for blind/low-vision users
+* **Hands-free operation** with wake word activation
+* **Text-to-speech** reads all listings aloud
+* **Natural language processing** understands various command phrasings
+* **Keyboard shortcuts** (Ctrl/Cmd + V to activate voice control)
+* **Screen reader compatible** with proper ARIA labels
+* **High contrast** design for visual accessibility
 
 ---
 

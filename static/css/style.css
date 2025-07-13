@@ -61,6 +61,146 @@ body {
     background: #fff;
 }
 
+/* App Description Section */
+.app-description {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 40px 0;
+    border-bottom: 3px solid #3498db;
+    margin-bottom: 30px;
+}
+
+.description-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.description-icon {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    background: white;
+    border: 4px solid #3498db;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.description-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.description-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.description-logo:hover {
+    transform: scale(1.05);
+}
+
+.description-text {
+    flex: 1;
+}
+
+.description-text h2 {
+    color: #2c3e50;
+    font-size: 1.8em;
+    margin-bottom: 15px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.description-text p {
+    color: #34495e;
+    font-size: 1.1em;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.description-features {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #3498db;
+    transition: transform 0.2s ease;
+}
+
+.feature:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.feature-icon {
+    font-size: 1.2em;
+}
+
+.feature span:last-child {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+@media (max-width: 768px) {
+    .description-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .description-icon {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+    }
+    
+    .description-logo {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .description-text h2 {
+        font-size: 1.5em;
+    }
+    
+    .description-text p {
+        font-size: 1em;
+        text-align: left;
+    }
+    
+    .description-features {
+        justify-content: center;
+    }
+    
+    .feature {
+        flex: 1;
+        min-width: 200px;
+        justify-content: center;
+    }
+}
+
 /* Controls */
 .controls {
     background: white;
@@ -501,6 +641,66 @@ tr:hover {
     font-size: 1.3em;
 }
 
+.voice-commands-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+.voice-commands-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+}
+
+.voice-commands-icon:hover {
+    transform: scale(1.1);
+}
+
+.voice-commands-header h3 {
+    margin: 0;
+    border: none;
+    padding: 0;
+    background: none;
+    color: #2c3e50;
+    font-size: 2.5em;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.command-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.command-header-icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
+    transition: transform 0.2s ease;
+}
+
+.command-header-icon:hover {
+    transform: scale(1.05);
+}
+
+.command-header h4 {
+    margin: 0;
+    color: #3498db;
+    font-size: 1.1em;
+}
+
 .command-section {
     margin-bottom: 25px;
     padding-bottom: 20px;
@@ -515,7 +715,13 @@ tr:hover {
 .command-section h4 {
     color: #3498db;
     margin-bottom: 10px;
-    font-size: 1.1em;
+    font-size: 1.5em;
+}
+
+.command-section h5 {
+    color: #3498db;
+    margin-bottom: 10px;
+    font-size: 1.0em;
 }
 
 .command-section ul {
