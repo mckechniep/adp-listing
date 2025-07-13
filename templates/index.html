@@ -23,6 +23,20 @@
     <div class="container">
         <div id="alerts"></div>
         
+        <!-- Wake Word Commands - Always Visible -->
+        <div class="wake-word-commands">
+            <h3>🔊 Wake Word Commands</h3>
+            <p><strong>To activate voice control hands-free, say any of these:</strong></p>
+            <ul>
+                <li>"TV Assistant"</li>
+                <li>"Voice Control"</li>
+                <li>"Activate Voice"</li>
+                <li>"Start Listening"</li>
+                <li>"Hey TV"</li>
+            </ul>
+            <p class="command-note">💡 The app continuously listens for these wake words in the background. After saying a wake word, you can use other voice commands to get TV listings.</p>
+        </div>
+        
         <div class="controls">
             <div class="control-row">
                 <div class="control-group">
@@ -56,25 +70,13 @@
                     <h3>🎯 Voice Commands</h3>
                     
                     <div class="command-section">
-                        <h4>🔊 Wake Word Commands:</h4>
-                        <p><strong>To activate voice control hands-free, say any of these:</strong></p>
-                        <ul>
-                            <li>"Hey TV"</li>
-                            <li>"TV Assistant"</li>
-                            <li>"Voice Control"</li>
-                            <li>"Activate Voice"</li>
-                            <li>"Start Listening"</li>
-                        </ul>
-                        <p class="command-note">💡 The app continuously listens for these wake words in the background. After saying a wake word, you can use the commands below.</p>
-                    </div>
-                    
-                    <div class="command-section">
                         <h4>📅 Get TV Listings By Date:</h4>
                         <ul>
+                            <li><strong>"Show me TV listings for [date]"</strong> - e.g., "Show me today"</li>
                             <li><strong>"Show me [date]"</strong> - e.g., "Show me Friday July 11"</li>
                             <li><strong>"Show [date]"</strong> - Works without "me" as well</li>
                         </ul>
-                        <p class="command-note">💡 Date matching is flexible - matches at least 2 parts (e.g., "Friday" + "11" or "July" + "12"). Listings will be automatically read aloud and the app will return to wake word listening.</p>
+                        <p class="command-note">💡 Date matching is flexible - matches at least 2 parts (e.g., "Friday" + "11" or "July" + "12"). The app will tell you how many listings were found and suggest voice commands to hear specific time periods.</p>
                     </div>
                     
 
@@ -82,12 +84,36 @@
                     <div class="command-section">
                         <h4>🔊 Read Listings Commands:</h4>
                         <ul>
-                            <li><strong>"Read listings"</strong> - Reads current listings aloud</li>
+                            <li><strong>"Read all listings"</strong> - Reads all listings aloud</li>
+                            <li><strong>"Read listings"</strong> - Reads first 20 listings</li>
                             <li><strong>"Read the listings"</strong> - Alternative command</li>
                             <li><strong>"Tell me the listings"</strong> - Another way to request reading</li>
                             <li><strong>"Read results"</strong> - Reads filtered results</li>
                         </ul>
-                        <p class="command-note">💡 After getting listings, use these commands to have them read aloud. The app will automatically return to wake word listening after reading.</p>
+                        <p class="command-note">💡 Use these commands to hear listings read aloud. The app will automatically return to wake word listening after reading.</p>
+                    </div>
+                    
+                    <div class="command-section">
+                        <h4>⏰ Time-Based Reading Commands:</h4>
+                        <ul>
+                            <li><strong>"Read morning listings"</strong> - Reads 6 AM to 12 PM shows</li>
+                            <li><strong>"Read afternoon listings"</strong> - Reads 12 PM to 6 PM shows</li>
+                            <li><strong>"Read prime time listings"</strong> - Reads 6 PM to 11 PM shows</li>
+                            <li><strong>"Read late night listings"</strong> - Reads 11 PM to 6 AM shows</li>
+                            <li><strong>"Read listings from 7 PM to 10 PM"</strong> - Custom time range</li>
+                        </ul>
+                        <p class="command-note">💡 These commands help you focus on specific time periods without being overwhelmed by all listings.</p>
+                    </div>
+                    
+                    <div class="command-section">
+                        <h4>📖 Continue Reading Commands:</h4>
+                        <ul>
+                            <li><strong>"Read next 10 listings"</strong> - Continues from where you left off</li>
+                            <li><strong>"Read more listings"</strong> - Alternative continue command</li>
+                            <li><strong>"Read remaining listings"</strong> - Reads all remaining listings</li>
+                            <li><strong>"Continue reading"</strong> - Another way to continue</li>
+                        </ul>
+                        <p class="command-note">💡 Use these commands to continue reading after the initial 20 listings, or to navigate through large sets of listings.</p>
                     </div>
                     
                     <div class="command-section">

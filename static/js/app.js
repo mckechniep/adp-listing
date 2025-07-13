@@ -12,6 +12,7 @@ let isReading = false;
 let wasVoiceTriggered = false; // Track if scraping was triggered by voice
 let audioContext = null; // For Web Audio API
 let speechSynthesisEnabled = false; // Track if speech synthesis is working
+let lastReadIndex = 0; // Track where we left off reading
 
 // Test function for speech synthesis
 function testSpeechSynthesis() {
@@ -203,6 +204,9 @@ function speakListings(autoRead = false) {
     console.log('speakListings called with autoRead:', autoRead);
     console.log('Current listings - allListings:', allListings.length, 'filteredListings:', filteredListings.length);
     
+    // Reset reading index when starting fresh
+    lastReadIndex = 0;
+    
     // Stop voice recognition while speaking
     if (isListening && recognition) {
         recognition.stop();
@@ -245,6 +249,8 @@ function speakListings(autoRead = false) {
     
     if (listingsToRead.length > readCount) {
         textToRead += `And ${listingsToRead.length - readCount} more listings.`;
+        // Update lastReadIndex for continuation
+        lastReadIndex = readCount;
     }
     
     console.log('Text to read:', textToRead);
@@ -268,10 +274,27 @@ function speakListings(autoRead = false) {
         // If this was triggered by voice command, revert to wake word listening
         if (wasVoiceTriggered) {
             setTimeout(() => {
-                // Close voice control and return to wake word listening
-                toggleVoice();
-                showVoiceFeedback('Returning to wake word listening', 'info');
-                wasVoiceTriggered = false; // Reset the flag
+                // Close voice control panel
+                const voicePanel = document.getElementById('voicePanel');
+                if (voicePanel) {
+                    voicePanel.style.display = 'none';
+                }
+                
+                // Stop current voice recognition
+                if (isListening && recognition) {
+                    try {
+                        recognition.stop();
+                    } catch (e) {
+                        console.log('Recognition already stopped');
+                    }
+                }
+                
+                // Restart global listening after a longer delay
+                setTimeout(() => {
+                    startGlobalListening();
+                    showVoiceFeedback('Returning to wake word listening', 'info');
+                    wasVoiceTriggered = false;
+                }, 500);
             }, 1000);
         }
     };
@@ -333,6 +356,373 @@ function updateReadButton() {
             readBtn.classList.remove('active');
         }
     }
+}
+
+// Helper function to convert time to 24-hour format
+function timeTo24Hour(timeStr) {
+    const hour = parseInt(timeStr.split(':')[0]);
+    const isPM = timeStr.includes('PM');
+    return isPM && hour !== 12 ? hour + 12 : (!isPM && hour === 12 ? 0 : hour);
+}
+
+// Helper function to check if a listing is in a specific time period
+function isListingInTimePeriod(listing, timePeriod) {
+    const hour = timeTo24Hour(listing.time);
+    
+    switch(timePeriod) {
+        case 'morning':
+            return hour >= 6 && hour < 12;
+        case 'afternoon':
+            return hour >= 12 && hour < 18;
+        case 'prime':
+            return hour >= 18 && hour < 23;
+        case 'late':
+            return hour >= 23 || hour < 6;
+        default:
+            return true;
+    }
+}
+
+// Read listings by time period
+function readListingsByTime(timePeriod) {
+    const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+    
+    if (listingsToRead.length === 0) {
+        showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+        return;
+    }
+    
+    // Filter listings by time period
+    const timeFilteredListings = listingsToRead.filter(listing => isListingInTimePeriod(listing, timePeriod));
+    
+    if (timeFilteredListings.length === 0) {
+        const periodNames = {
+            'morning': 'morning (6 AM - 12 PM)',
+            'afternoon': 'afternoon (12 PM - 6 PM)',
+            'prime': 'prime time (6 PM - 11 PM)',
+            'late': 'late night (11 PM - 6 AM)'
+        };
+        showVoiceFeedback(`No listings found for ${periodNames[timePeriod]}.`, 'error');
+        return;
+    }
+    
+    // Reset reading index for new time period
+    lastReadIndex = 0;
+    
+    // Read the filtered listings
+    speakSpecificListings(timeFilteredListings, true, timePeriod);
+}
+
+// Read listings by specific time range
+function readListingsByTimeRange(command) {
+    const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+    
+    if (listingsToRead.length === 0) {
+        showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+        return;
+    }
+    
+    // Extract time range from command (basic implementation)
+    // This could be enhanced with more sophisticated time parsing
+    const timeMatch = command.match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)\s*(?:to|until|-)\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)/i);
+    
+    if (!timeMatch) {
+        showVoiceFeedback('Please specify a time range like "Read listings from 7 PM to 10 PM"', 'error');
+        return;
+    }
+    
+    const startTime = timeMatch[1];
+    const endTime = timeMatch[2];
+    
+    // Filter listings by time range
+    const rangeFilteredListings = listingsToRead.filter(listing => {
+        const listingHour = timeTo24Hour(listing.time);
+        const startHour = timeTo24Hour(startTime);
+        const endHour = timeTo24Hour(endTime);
+        
+        // Handle overnight ranges
+        if (endHour < startHour) {
+            return listingHour >= startHour || listingHour < endHour;
+        } else {
+            return listingHour >= startHour && listingHour < endHour;
+        }
+    });
+    
+    if (rangeFilteredListings.length === 0) {
+        showVoiceFeedback(`No listings found between ${startTime} and ${endTime}.`, 'error');
+        return;
+    }
+    
+    // Reset reading index for new time range
+    lastReadIndex = 0;
+    
+    // Read the filtered listings
+    speakSpecificListings(rangeFilteredListings, true, `${startTime} to ${endTime}`);
+}
+
+// Continue reading from where we left off
+function continueReadingListings() {
+    const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+    
+    if (listingsToRead.length === 0) {
+        showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+        return;
+    }
+    
+    if (lastReadIndex >= listingsToRead.length) {
+        showVoiceFeedback('You have reached the end of the listings.', 'info');
+        return;
+    }
+    
+    // Read next 10 listings
+    const nextListings = listingsToRead.slice(lastReadIndex, lastReadIndex + 10);
+    speakSpecificListings(nextListings, false, 'next 10 listings');
+    lastReadIndex += 10;
+}
+
+// Read all remaining listings
+function readRemainingListings() {
+    const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+    
+    if (listingsToRead.length === 0) {
+        showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+        return;
+    }
+    
+    if (lastReadIndex >= listingsToRead.length) {
+        showVoiceFeedback('You have reached the end of the listings.', 'info');
+        return;
+    }
+    
+    // Read all remaining listings
+    const remainingListings = listingsToRead.slice(lastReadIndex);
+    speakSpecificListings(remainingListings, false, 'remaining listings');
+    lastReadIndex = listingsToRead.length;
+}
+
+// Speak listings summary and guidance
+function speakListingsSummary() {
+    if (!isSpeechSynthesisReady()) {
+        console.error('Text-to-speech not supported or not ready');
+        showVoiceFeedback('Speech synthesis needs to be enabled. Please press any key or tap the screen.', 'error');
+        return;
+    }
+    
+    // Stop voice recognition while speaking
+    if (isListening && recognition) {
+        recognition.stop();
+    }
+    
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+    
+    // Prepare the summary text
+    let textToRead = '';
+    
+    // Add the header information
+    const dateDisplay = document.getElementById('currentDateDisplay').textContent.replace('- ', '');
+    if (dateDisplay) {
+        textToRead += `TV Listings for ${dateDisplay}. `;
+    }
+    
+    // Add count and guidance
+    const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+    const totalListings = listingsToRead.length;
+    
+    textToRead += `Found ${totalListings} TV listings. `;
+    
+    if (totalListings > 0) {
+        textToRead += `You can say "Read morning listings" for 6 AM to 12 PM shows, "Read afternoon listings" for 12 PM to 6 PM shows, "Read prime time listings" for 6 PM to 11 PM shows, or "Read late night listings" for 11 PM to 6 AM shows. `;
+        textToRead += `You can also say "Read listings from 8 PM to 11 PM" for a specific time range, or "Read all listings" to hear everything. `;
+        textToRead += `What would you like to hear?`;
+    } else {
+        textToRead += `No listings found for this date.`;
+    }
+    
+    console.log('Summary text to read:', textToRead);
+    
+    // Create utterance
+    currentUtterance = new SpeechSynthesisUtterance(textToRead);
+    currentUtterance.rate = 0.9;
+    currentUtterance.pitch = 1.0;
+    currentUtterance.volume = 1.0;
+    
+    // Handle completion
+    currentUtterance.onend = function() {
+        console.log('Summary speech synthesis completed');
+        isReading = false;
+        updateReadButton();
+        
+        // If this was triggered by voice command, revert to wake word listening
+        if (wasVoiceTriggered) {
+            setTimeout(() => {
+                // Close voice control panel
+                const voicePanel = document.getElementById('voicePanel');
+                if (voicePanel) {
+                    voicePanel.style.display = 'none';
+                }
+                
+                // Stop current voice recognition
+                if (isListening && recognition) {
+                    try {
+                        recognition.stop();
+                    } catch (e) {
+                        console.log('Recognition already stopped');
+                    }
+                }
+                
+                // Restart global listening after a longer delay
+                setTimeout(() => {
+                    startGlobalListening();
+                    showVoiceFeedback('Returning to wake word listening', 'info');
+                    wasVoiceTriggered = false;
+                }, 500);
+            }, 1000);
+        }
+    };
+    
+    currentUtterance.onerror = function(event) {
+        console.error('Summary speech synthesis error:', event);
+        isReading = false;
+        updateReadButton();
+        
+        if (event.error === 'not-allowed') {
+            showVoiceFeedback('Speech synthesis blocked. Please click the page first, then try again.', 'error');
+        } else {
+            showVoiceFeedback('Speech synthesis error: ' + event.error, 'error');
+        }
+        
+        if (wasVoiceTriggered) {
+            setTimeout(() => {
+                // Close voice control panel
+                const voicePanel = document.getElementById('voicePanel');
+                if (voicePanel) {
+                    voicePanel.style.display = 'none';
+                }
+                
+                // Stop current voice recognition
+                if (isListening && recognition) {
+                    try {
+                        recognition.stop();
+                    } catch (e) {
+                        console.log('Recognition already stopped');
+                    }
+                }
+                
+                // Restart global listening after a longer delay
+                setTimeout(() => {
+                    startGlobalListening();
+                    showVoiceFeedback('Returning to wake word listening', 'info');
+                    wasVoiceTriggered = false;
+                }, 500);
+            }, 1000);
+        }
+    };
+    
+    // Start speaking
+    isReading = true;
+    updateReadButton();
+    speechSynthesis.speak(currentUtterance);
+}
+
+// Speak specific listings with context
+function speakSpecificListings(listings, autoRead = false, context = '') {
+    if (!isSpeechSynthesisReady()) {
+        console.error('Text-to-speech not supported or not ready');
+        showVoiceFeedback('Speech synthesis needs to be enabled. Please press any key or tap the screen.', 'error');
+        return;
+    }
+    
+    // Stop voice recognition while speaking
+    if (isListening && recognition) {
+        recognition.stop();
+    }
+    
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+    
+    // Prepare the text to read
+    let textToRead = '';
+    
+    // Add context information
+    if (context) {
+        textToRead += `${context}. `;
+    }
+    
+    textToRead += `Showing ${listings.length} listings. `;
+    
+    // Read all listings in the filtered set
+    for (let i = 0; i < listings.length; i++) {
+        const listing = listings[i];
+        textToRead += `At ${listing.time}, on ${listing.network}, ${listing.program}. `;
+    }
+    
+    console.log('Text to read:', textToRead);
+    
+    // Create utterance
+    currentUtterance = new SpeechSynthesisUtterance(textToRead);
+    currentUtterance.rate = 0.9;
+    currentUtterance.pitch = 1.0;
+    currentUtterance.volume = 1.0;
+    
+    // Handle completion
+    currentUtterance.onend = function() {
+        console.log('Speech synthesis completed');
+        isReading = false;
+        updateReadButton();
+        
+        // If this was triggered by voice command, revert to wake word listening
+        if (wasVoiceTriggered) {
+            setTimeout(() => {
+                toggleVoice();
+                showVoiceFeedback('Returning to wake word listening', 'info');
+                wasVoiceTriggered = false;
+            }, 1000);
+        }
+    };
+    
+    currentUtterance.onerror = function(event) {
+        console.error('Speech synthesis error:', event);
+        isReading = false;
+        updateReadButton();
+        
+        if (event.error === 'not-allowed') {
+            showVoiceFeedback('Speech synthesis blocked. Please click the page first, then try again.', 'error');
+        } else {
+            showVoiceFeedback('Speech synthesis error: ' + event.error, 'error');
+        }
+        
+        if (wasVoiceTriggered) {
+            setTimeout(() => {
+                // Close voice control panel
+                const voicePanel = document.getElementById('voicePanel');
+                if (voicePanel) {
+                    voicePanel.style.display = 'none';
+                }
+                
+                // Stop current voice recognition
+                if (isListening && recognition) {
+                    try {
+                        recognition.stop();
+                    } catch (e) {
+                        console.log('Recognition already stopped');
+                    }
+                }
+                
+                // Restart global listening after a longer delay
+                setTimeout(() => {
+                    startGlobalListening();
+                    showVoiceFeedback('Returning to wake word listening', 'info');
+                    wasVoiceTriggered = false;
+                }, 500);
+            }, 1000);
+        }
+    };
+    
+    // Start speaking
+    isReading = true;
+    updateReadButton();
+    speechSynthesis.speak(currentUtterance);
 }
 
 // Initialize voice recognition
@@ -461,7 +851,71 @@ function initializeGlobalVoiceRecognition() {
             }
         }
         
-
+        // Time-based reading commands that work in wake word mode
+        else if (command.includes('read morning') || command.includes('morning listings') || command.includes('morning shows')) {
+            console.log('Morning listings command detected in wake word mode:', command);
+            readListingsByTime('morning');
+        }
+        else if (command.includes('read afternoon') || command.includes('afternoon listings') || command.includes('afternoon shows')) {
+            console.log('Afternoon listings command detected in wake word mode:', command);
+            readListingsByTime('afternoon');
+        }
+        else if (command.includes('read prime') || command.includes('prime time') || command.includes('evening listings') || command.includes('evening shows')) {
+            console.log('Prime time listings command detected in wake word mode:', command);
+            readListingsByTime('prime');
+        }
+        else if (command.includes('read late') || command.includes('late night') || command.includes('night listings') || command.includes('night shows')) {
+            console.log('Late night listings command detected in wake word mode:', command);
+            readListingsByTime('late');
+        }
+        // Specific time range commands
+        else if (command.includes('read listings from') || command.includes('read shows from')) {
+            console.log('Specific time range command detected in wake word mode:', command);
+            readListingsByTimeRange(command);
+        }
+        // Continue reading commands
+        else if (command.includes('read next') || command.includes('read more') || command.includes('continue reading')) {
+            console.log('Continue reading command detected in wake word mode:', command);
+            continueReadingListings();
+        }
+        else if (command.includes('read remaining') || command.includes('read rest')) {
+            console.log('Read remaining command detected in wake word mode:', command);
+            readRemainingListings();
+        }
+        // Read all listings command
+        else if (command.includes('read all listing') || command.includes('read all listings') || command.includes('read everything')) {
+            console.log('Read all listings command detected in wake word mode:', command);
+            
+            const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+            if (listingsToRead.length > 0) {
+                showVoiceFeedback('Reading all listings...', 'success');
+                speakSpecificListings(listingsToRead, true, 'all listings');
+            } else {
+                showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+            }
+        }
+        // Regular read listings commands
+        else if (command.includes('read listing') || command.includes('read the listing') || 
+                 command.includes('read result') || command.includes('read them') ||
+                 command.includes('speak listing') || command.includes('tell me the listing') ||
+                 command.includes('what are the listing') || command.includes('repeat listing') ||
+                 command.includes('read it') || command.includes('read those') ||
+                 command.includes('read listings') || command.includes('read the listings') ||
+                 command.includes('tell me the listings') || command.includes('what are the listings') ||
+                 command.includes('speak the listings') || command.includes('read the results') ||
+                 command.includes('tell me what') || command.includes('what shows') ||
+                 command.includes('what programs') || command.includes('what movies')) {
+            
+            console.log('Read listings command detected in wake word mode:', command);
+            
+            const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+            if (listingsToRead.length > 0) {
+                showVoiceFeedback('Reading listings...', 'success');
+                speakListings(true);
+            } else {
+                showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+            }
+        }
         
         // Check for "reset" or "start over" commands
         else if (command.includes('reset') || command.includes('start over') || 
@@ -488,12 +942,13 @@ function initializeGlobalVoiceRecognition() {
     globalRecognition.onerror = function(event) {
         console.error('Global speech recognition error:', event.error);
         showWakeWordStatus('error');
-        // Restart global listening on error
-        setTimeout(() => {
-            if (document.getElementById('voicePanel').style.display === 'none') {
+        
+        // Don't restart if voice panel is open or if we're in the middle of a transition
+        if (document.getElementById('voicePanel').style.display === 'none' && !wasVoiceTriggered) {
+            setTimeout(() => {
                 startGlobalListening();
-            }
-        }, 2000);
+            }, 2000);
+        }
     };
 }
 
@@ -501,7 +956,12 @@ function initializeGlobalVoiceRecognition() {
 function startGlobalListening() {
     if (globalRecognition && !isGlobalListening && !isListening) {
         try {
-            globalRecognition.start();
+            // Add a small delay to ensure any previous recognition is fully stopped
+            setTimeout(() => {
+                if (!isGlobalListening && !isListening) {
+                    globalRecognition.start();
+                }
+            }, 100);
         } catch (e) {
             console.error('Failed to start global recognition:', e);
         }
@@ -693,6 +1153,21 @@ function processVoiceCommand(transcript) {
     }
     
     // Read listings commands
+    else if (command.includes('read all listing') || command.includes('read all listings') || command.includes('read everything')) {
+        console.log('Read all listings command detected:', command);
+        
+        // Check if there are listings to read
+        const listingsToRead = filteredListings.length > 0 ? filteredListings : allListings;
+        console.log('Listings to read - filteredListings:', filteredListings.length, 'allListings:', allListings.length);
+        
+        if (listingsToRead.length > 0) {
+            showVoiceFeedback('Reading all listings...', 'success');
+            // Read all listings when user specifically requests it
+            speakSpecificListings(listingsToRead, true, 'all listings');
+        } else {
+            showVoiceFeedback('No listings to read. Please get listings first.', 'error');
+        }
+    }
     else if (command.includes('read listing') || command.includes('read the listing') || 
              command.includes('read result') || command.includes('read them') ||
              command.includes('speak listing') || command.includes('tell me the listing') ||
@@ -717,6 +1192,38 @@ function processVoiceCommand(transcript) {
         } else {
             showVoiceFeedback('No listings to read. Please get listings first.', 'error');
         }
+    }
+    
+    // Time-based reading commands
+    else if (command.includes('read morning') || command.includes('morning listings') || command.includes('morning shows')) {
+        console.log('Morning listings command detected:', command);
+        readListingsByTime('morning');
+    }
+    else if (command.includes('read afternoon') || command.includes('afternoon listings') || command.includes('afternoon shows')) {
+        console.log('Afternoon listings command detected:', command);
+        readListingsByTime('afternoon');
+    }
+    else if (command.includes('read prime') || command.includes('prime time') || command.includes('evening listings') || command.includes('evening shows')) {
+        console.log('Prime time listings command detected:', command);
+        readListingsByTime('prime');
+    }
+    else if (command.includes('read late') || command.includes('late night') || command.includes('night listings') || command.includes('night shows')) {
+        console.log('Late night listings command detected:', command);
+        readListingsByTime('late');
+    }
+    // Specific time range commands
+    else if (command.includes('read listings from') || command.includes('read shows from')) {
+        console.log('Specific time range command detected:', command);
+        readListingsByTimeRange(command);
+    }
+    // Continue reading commands
+    else if (command.includes('read next') || command.includes('read more') || command.includes('continue reading')) {
+        console.log('Continue reading command detected:', command);
+        continueReadingListings();
+    }
+    else if (command.includes('read remaining') || command.includes('read rest')) {
+        console.log('Read remaining command detected:', command);
+        readRemainingListings();
     }
     
 
@@ -868,13 +1375,13 @@ async function scrapeListings() {
             }
             showAlert(message + '!');
             
-            // Auto-read if this was triggered by voice command
+            // Provide summary and guidance if this was triggered by voice command
             if (wasVoiceTriggered) {
-                console.log('Auto-read triggered, wasVoiceTriggered:', wasVoiceTriggered);
+                console.log('Voice-triggered summary, wasVoiceTriggered:', wasVoiceTriggered);
                 setTimeout(() => {
-                    speakListings(true);
+                    speakListingsSummary();
                 }, 1000); // Give time for the page to update
-                // Don't reset wasVoiceTriggered here - let speakListings handle it
+                // Don't reset wasVoiceTriggered here - let speakListingsSummary handle it
             }
         } else {
             showAlert('Failed to scrape listings. Please try again.', 'error');

@@ -341,6 +341,48 @@ tr:hover {
     background-color: white;
 }
 
+/* Wake Word Commands - Always Visible */
+.wake-word-commands {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
+}
+
+.wake-word-commands h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.wake-word-commands p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.wake-word-commands ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 15px;
+}
+
+.wake-word-commands li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+    color: #555;
+}
+
+.wake-word-commands li:before {
+    content: "•";
+    color: #3498db;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
 /* Wake Word Status Indicator */
 .wake-word-status {
     position: fixed;
