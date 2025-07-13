@@ -9,8 +9,9 @@
 <body>
     <div class="header">
         <div class="container">
-            <h1>📺 TV Listings Scraper</h1>
-            <p>Audio Description Project - TV Schedule Data Extractor</p>
+            <img src="{{ url_for('static', filename='img/descrip-tv-header.png') }}" 
+                 alt="Descrip-TV: Audio Description TV Listings" 
+                 class="header-image" />
         </div>
     </div>
     
@@ -25,16 +26,23 @@
         
         <!-- Wake Word Commands - Always Visible -->
         <div class="wake-word-commands">
-            <h3>🔊 Wake Word Commands</h3>
-            <p><strong>To activate voice control hands-free, say any of these:</strong></p>
-            <ul>
-                <li>"TV Assistant"</li>
-                <li>"Voice Control"</li>
-                <li>"Activate Voice"</li>
-                <li>"Start Listening"</li>
-                <li>"Hey TV"</li>
-            </ul>
-            <p class="command-note">💡 The app continuously listens for these wake words in the background. After saying a wake word, you can use other voice commands to get TV listings.</p>
+            <div class="wake-word-flex">
+                <img src="{{ url_for('static', filename='img/man-speaking-vector.png') }}" 
+                     alt="Person speaking, representing voice commands" 
+                     class="wake-word-image" />
+                <div class="wake-word-instructions">
+                    <h3>Wake Word Commands</h3>
+                    <p><strong>To activate voice control hands-free, say any of these:</strong></p>
+                    <ul>
+                        <li>"TV Assistant"</li>
+                        <li>"Voice Control"</li>
+                        <li>"Activate Voice"</li>
+                        <li>"Start Listening"</li>
+                        <li>"Hey TV"</li>
+                    </ul>
+                    <p class="command-note">💡 The app continuously listens for these wake words in the background. Saying a wake word will activate voice control features.</p>
+                </div>
+            </div>
         </div>
         
         <div class="controls">
@@ -182,35 +190,39 @@
         
         <!-- Filters Section - Only shown when listings are available -->
         <div id="filtersSection" class="filters-section" style="display: none;">
-            <h3>🔍 Filter Listings</h3>
-            <p class="filter-description">Use these filters to narrow down the listings after getting results:</p>
-            
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="networkFilter">Filter by Network:</label>
-                    <select id="networkFilter">
-                        <option value="">All Networks</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="timeFilter">Filter by Time:</label>
-                    <select id="timeFilter">
-                        <option value="">All Times</option>
-                        <option value="morning">Morning (6 AM - 12 PM)</option>
-                        <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
-                        <option value="prime">Prime Time (6 PM - 11 PM)</option>
-                        <option value="late">Late Night (11 PM - 6 AM)</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="typeFilter">Filter by Type:</label>
-                    <select id="typeFilter">
-                        <option value="">All Programs</option>
-                        <option value="movies">Movies Only</option>
-                        <option value="series">Series Only</option>
-                    </select>
+            <div class="filter-flex">
+                <img src="{{ url_for('static', filename='img/tv-listings-vector.png') }}"
+                     alt="TV listings illustration" 
+                     class="filter-image" />
+                <div class="filter-instructions">
+                    <h3>🔍 Filter Listings</h3>
+                    <p class="filter-description">Use these filters to narrow down the listings after getting results:</p>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="networkFilter">Filter by Network:</label>
+                            <select id="networkFilter">
+                                <option value="">All Networks</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="timeFilter">Filter by Time:</label>
+                            <select id="timeFilter">
+                                <option value="">All Times</option>
+                                <option value="morning">Morning (6 AM - 12 PM)</option>
+                                <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
+                                <option value="prime">Prime Time (6 PM - 11 PM)</option>
+                                <option value="late">Late Night (11 PM - 6 AM)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="typeFilter">Filter by Type:</label>
+                            <select id="typeFilter">
+                                <option value="">All Programs</option>
+                                <option value="movies">Movies Only</option>
+                                <option value="series">Series Only</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
